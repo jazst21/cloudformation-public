@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+
+  AWS CloudFormation SA Assignment - WARNING: You will be billed for the
+  AWS resources used if you create a stack from this template and consume all your
+  promotional credit. 
+
+  We recommend you create a billing alert. Once you submit your
+  answers delete the CloudFormation stack and terminate any other resources launched
+  in relation to this exercise. 
+
+  Feel free to do that as soon as you have submitted
+  your document and before your interview.
+
+Parameters:
+
+  CandidateName:
+    Description: 'pugar'
+    Type: String
+    MaxLength: '50'
+    MinLength: '3'
+    ConstraintDescription: pugar
+
+Resources:
+  s3bucket-aws-sa:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      AccessControl: PublicRead
+      BucketName: public-bucket
+      MetricsConfigurations:
+        - Id: EntireBucket
+      WebsiteConfiguration:
+        IndexDocument: demo.html
+        # ErrorDocument: error.html
+        # RoutingRules:
+        #   - RoutingRuleCondition:
+        #       HttpErrorCodeReturnedEquals: '404'
+        #       KeyPrefixEquals: out1/
+        #     RedirectRule:
+        #       HostName: ec2-11-22-333-44.compute-1.amazonaws.com
+        #       ReplaceKeyPrefixWith: report-404/
+    DeletionPolicy: Retain
+
+  cdn-distribution-aws-sa:
+    Type: 'AWS::CloudFront::Distribution'
+    Properties: {}
+    DependsOn:
+      - s3bucket-aws-sa
+
+
+    
+Outputs:
+
+  s3websiteBucket:
+    Description: The DNSName of the load balancer
+    Value: !Join [ "/", [ !GetAtt SAelb.DNSName , ] ]
+
+  WebsiteURL:
+    Value: !GetAtt
+      - S3Bucket
+      - WebsiteURL
+    Description: URL for website hosted on S3
+  S3BucketSecureURL:
+    Value: !Join
+      - ''
+      - - 'https://'
+        - !GetAtt
+          - S3Bucket
+          - DomainName
+    Description: Name of S3 bucket to hold website content
